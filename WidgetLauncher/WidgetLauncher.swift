@@ -4,21 +4,21 @@ import AppIntents
 
 struct Provider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: .now, configuration: ConfigurationAppIntent())
+        SimpleEntry(date: .now, configuration: LauncherConfigurationIntent())
     }
 
-    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
+    func snapshot(for configuration: LauncherConfigurationIntent, in context: Context) async -> SimpleEntry {
         SimpleEntry(date: .now, configuration: configuration)
     }
 
-    func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
+    func timeline(for configuration: LauncherConfigurationIntent, in context: Context) async -> Timeline<SimpleEntry> {
         Timeline(entries: [SimpleEntry(date: .now, configuration: configuration)], policy: .never)
     }
 }
 
 struct SimpleEntry: TimelineEntry {
     let date: Date
-    let configuration: ConfigurationAppIntent
+    let configuration: LauncherConfigurationIntent
 }
 
 struct WidgetLauncherEntryView: View {
@@ -52,7 +52,7 @@ struct WidgetLauncher: Widget {
     let kind = "WidgetLauncher"
 
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
+        AppIntentConfiguration(kind: kind, intent: LauncherConfigurationIntent.self, provider: Provider()) { entry in
             WidgetLauncherEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
@@ -65,5 +65,5 @@ struct WidgetLauncher: Widget {
 #Preview(as: .systemSmall) {
     WidgetLauncher()
 } timeline: {
-    SimpleEntry(date: .now, configuration: ConfigurationAppIntent())
+    SimpleEntry(date: .now, configuration: LauncherConfigurationIntent())
 }
