@@ -50,7 +50,27 @@ struct WidgetLauncherEntryView: View {
     }
 
     private var categoryTitle: String {
-        LauncherCategory.caseDisplayRepresentations[entry.configuration.category]?.title.description ?? "Suggestions"
+        switch entry.configuration.category {
+        case .suggestions: "Suggestions"
+        case .banking: "Banking"
+        case .payments: "Payments"
+        case .crypto: "Crypto"
+        case .trading: "Trading"
+        case .smartHome: "Smart Home"
+        case .work: "Work"
+        case .ai: "AI"
+        case .security: "Security"
+        case .communication: "Communication"
+        case .social: "Social"
+        case .travel: "Travel"
+        case .transportation: "Transportation"
+        case .shopping: "Shopping"
+        case .food: "Food & Dining"
+        case .entertainment: "Entertainment"
+        case .healthFitness: "Health & Fitness"
+        case .utilities: "Utilities"
+        case .uncategorized: "Uncategorized"
+        }
     }
 
     @ViewBuilder
