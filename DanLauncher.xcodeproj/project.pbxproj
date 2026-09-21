@@ -6,14 +6,63 @@
 	objectVersion = 90;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F068DC0D3061A784003AE6C4 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F068DC0C3061A784003AE6C4 /* WidgetKit.framework */; };
+		F068DC0F3061A784003AE6C4 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F068DC0E3061A784003AE6C4 /* SwiftUI.framework */; };
+		F068DC1C3061A786003AE6C4 /* LauncherWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F068DC0A3061A784003AE6C4 /* LauncherWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F068DC1A3061A786003AE6C4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F068DC093061A784003AE6C4;
+			remoteInfo = LauncherWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F068DC1D3061A786003AE6C4 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				F068DC1C3061A786003AE6C4 /* LauncherWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* DanLauncher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DanLauncher.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F068DC0A3061A784003AE6C4 /* LauncherWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LauncherWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F068DC0C3061A784003AE6C4 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		F068DC0E3061A784003AE6C4 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F068DC203061A786003AE6C4 /* Exceptions for "LauncherWidget" folder in "LauncherWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = F068DC093061A784003AE6C4 /* LauncherWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		000000000000000000000010 /* DanLauncher */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = DanLauncher;
+			sourceTree = "<group>";
+		};
+		F068DC103061A784003AE6C4 /* LauncherWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F068DC203061A786003AE6C4 /* Exceptions for "LauncherWidget" folder in "LauncherWidgetExtension" target */,
+			);
+			path = LauncherWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -24,6 +73,13 @@
 			files = (
 			);
 		};
+		F068DC073061A784003AE6C4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				F068DC0F3061A784003AE6C4 /* SwiftUI.framework in Frameworks */,
+				F068DC0D3061A784003AE6C4 /* WidgetKit.framework in Frameworks */,
+			);
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -31,6 +87,8 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000010 /* DanLauncher */,
+				F068DC103061A784003AE6C4 /* LauncherWidget */,
+				F068DC0B3061A784003AE6C4 /* Frameworks */,
 				000000000000000000000020 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -39,8 +97,18 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000120 /* DanLauncher.app */,
+				F068DC0A3061A784003AE6C4 /* LauncherWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F068DC0B3061A784003AE6C4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F068DC0C3061A784003AE6C4 /* WidgetKit.framework */,
+				F068DC0E3061A784003AE6C4 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -53,8 +121,12 @@
 				000000000000000120000000 /* Sources */,
 				000000000000000130000000 /* Frameworks */,
 				000000000000000140000000 /* Resources */,
+				F068DC1D3061A786003AE6C4 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
+			);
+			dependencies = (
+				F068DC1B3061A786003AE6C4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				000000000000000000000010 /* DanLauncher */,
@@ -64,6 +136,24 @@
 			productReference = 000000000000000000000120 /* DanLauncher.app */;
 			productType = "com.apple.product-type.application";
 		};
+		F068DC093061A784003AE6C4 /* LauncherWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F068DC213061A786003AE6C4 /* Build configuration list for PBXNativeTarget "LauncherWidgetExtension" */;
+			buildPhases = (
+				F068DC063061A784003AE6C4 /* Sources */,
+				F068DC073061A784003AE6C4 /* Frameworks */,
+				F068DC083061A784003AE6C4 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				F068DC103061A784003AE6C4 /* LauncherWidget */,
+			);
+			name = LauncherWidgetExtension;
+			productName = LauncherWidgetExtension;
+			productReference = F068DC0A3061A784003AE6C4 /* LauncherWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -71,11 +161,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2630;
+				LastSwiftUpdateCheck = 2700;
 				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					000000000000000100000000 = {
 						CreatedOnToolsVersion = 26.3;
+					};
+					F068DC093061A784003AE6C4 = {
+						CreatedOnToolsVersion = 27.0;
 					};
 				};
 			};
@@ -94,12 +187,18 @@
 			projectRoot = "";
 			targets = (
 				000000000000000100000000 /* DanLauncher */,
+				F068DC093061A784003AE6C4 /* LauncherWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		000000000000000140000000 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		F068DC083061A784003AE6C4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -112,7 +211,20 @@
 			files = (
 			);
 		};
+		F068DC063061A784003AE6C4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F068DC1B3061A786003AE6C4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F068DC093061A784003AE6C4 /* LauncherWidgetExtension */;
+			targetProxy = F068DC1A3061A786003AE6C4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		000000000000000011000000 /* Debug configuration for PBXProject "DanLauncher" */ = {
@@ -321,6 +433,67 @@
 			};
 			name = Release;
 		};
+		F068DC1E3061A786003AE6C4 /* Debug configuration for PBXNativeTarget "LauncherWidgetExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LauncherWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LauncherWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = devplaceholder.OXJJUDJ2.DanLauncher.LauncherWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F068DC1F3061A786003AE6C4 /* Release configuration for PBXNativeTarget "LauncherWidgetExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LauncherWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LauncherWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = devplaceholder.OXJJUDJ2.DanLauncher.LauncherWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -337,6 +510,14 @@
 			buildConfigurations = (
 				000000000000000111000000 /* Debug configuration for PBXNativeTarget "DanLauncher" */,
 				000000000000000112000000 /* Release configuration for PBXNativeTarget "DanLauncher" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		F068DC213061A786003AE6C4 /* Build configuration list for PBXNativeTarget "LauncherWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F068DC1E3061A786003AE6C4 /* Debug configuration for PBXNativeTarget "LauncherWidgetExtension" */,
+				F068DC1F3061A786003AE6C4 /* Release configuration for PBXNativeTarget "LauncherWidgetExtension" */,
 			);
 			defaultConfigurationName = Release;
 		};
