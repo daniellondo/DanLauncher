@@ -1,10 +1,3 @@
-//
-//  LauncherWidget.swift
-//  LauncherWidget
-//
-//  Created by Daniel Londoño Ospina on 21/09/26.
-//
-
 import WidgetKit
 import SwiftUI
 import AppIntents
@@ -32,16 +25,26 @@ struct LauncherWidgetEntryView: View {
     var entry: Provider.Entry
 
     var body: some View {
-        Button(intent: RunSystemShortcutIntent(shortcut: entry.configuration.shortcut)) {
-            VStack(spacing: 8) {
-                Image(systemName: "square.grid.2x2.fill")
-                    .font(.system(size: 36))
-                Text("Abrir")
-                    .font(.headline)
+        Group {
+            if let shortcut = entry.configuration.shortcut {
+                Button(intent: RunSystemShortcutIntent(shortcut: shortcut)) {
+                    launcherLabel
+                }
+                .buttonStyle(.plain)
+            } else {
+                launcherLabel
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .buttonStyle(.plain)
+    }
+
+    private var launcherLabel: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "square.grid.2x2.fill")
+                .font(.system(size: 36))
+            Text(entry.configuration.shortcut == nil ? "Configurar" : "Abrir")
+                .font(.headline)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -49,11 +52,7 @@ struct LauncherWidget: Widget {
     let kind = "LauncherWidget"
 
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(
-            kind: kind,
-            intent: ConfigurationAppIntent.self,
-            provider: Provider()
-        ) { entry in
+        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             LauncherWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
