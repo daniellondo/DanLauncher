@@ -1,18 +1,10 @@
-//
-//  AppIntent.swift
-//  WidgetLauncher
-//
-//  Created by Daniel Londoño Ospina on 21/09/26.
-//
-
 import WidgetKit
 import AppIntents
 
 struct ConfigurationAppIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource { "Configuration" }
-    static var description: IntentDescription { "This is an example widget." }
+    static var title: LocalizedStringResource { "Launcher" }
+    static var description: IntentDescription { "Choose an app or shortcut to launch." }
 
-    // An example configurable parameter.
-    @Parameter(title: "Favorite Emoji", default: "😃")
-    var favoriteEmoji: String
+    @Parameter(title: "Action")
+    var shortcut: SystemShortcut?
 }
