@@ -9,10 +9,11 @@ import WidgetKit
 import AppIntents
 
 struct ConfigurationAppIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource { "Configuration" }
-    static var description: IntentDescription { "This is an example widget." }
+    static var title: LocalizedStringResource { "Launcher" }
+    static var description: IntentDescription {
+        "Choose an installed app, App Shortcut, custom shortcut, or system action to launch from the widget."
+    }
 
-    // An example configurable parameter.
-    @Parameter(title: "Favorite Emoji", default: "😃")
-    var favoriteEmoji: String
+    @Parameter(title: "Action")
+    var shortcut: SystemShortcut
 }
