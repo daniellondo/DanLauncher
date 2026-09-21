@@ -84,8 +84,15 @@ struct LauncherConfigurationIntent: WidgetConfigurationIntent {
     @Parameter(title: "Background", default: .system)
     var background: LauncherBackground
 
-    // Temporary launch actions. These preserve the proven direct-launch path
-    // while automatic installed-app discovery is implemented separately.
+    @Parameter(title: "Show App Names", default: true)
+    var showAppNames: Bool
+
+    @Parameter(title: "App Store Icons", default: false)
+    var useAppStoreIcons: Bool
+
+    // App Store Icons is opt-in: sends selected display names (or known Store IDs)
+    // to Apple for artwork. It does not extract installed apps or their icons.
+    // Keep the existing parameter IDs so configured actions remain intact.
     @Parameter(title: "App 1") var shortcut1: SystemShortcut?
     @Parameter(title: "App 2") var shortcut2: SystemShortcut?
     @Parameter(title: "App 3") var shortcut3: SystemShortcut?
