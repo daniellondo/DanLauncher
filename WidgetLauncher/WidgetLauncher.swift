@@ -1,6 +1,7 @@
 import WidgetKit
 import SwiftUI
 import AppIntents
+import UIKit
 
 struct Provider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
@@ -120,24 +121,93 @@ struct WidgetLauncherEntryView: View {
     private func launcherSlot(_ shortcut: SystemShortcut?, number: Int) -> some View {
         if let shortcut {
             Button(intent: RunSystemShortcutIntent(shortcut: shortcut)) {
-                slotLabel(number: number, configured: true)
+                configuredSlot(shortcut)
             }
             .buttonStyle(.plain)
         } else {
-            slotLabel(number: number, configured: false)
+            VStack(spacing: 3) {
+                Image(systemName: "plus.app")
+                    .font(.title2)
+                Text("\(number)")
+                    .font(.caption2)
+            }
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .contentShape(Rectangle())
         }
     }
 
-    private func slotLabel(number: Int, configured: Bool) -> some View {
-        VStack(spacing: 3) {
-            Image(systemName: configured ? "app.fill" : "plus.app")
-                .font(.title2)
-            Text(configured ? "Open" : "\(number)")
+    private func configuredSlot(_ shortcut: SystemShortcut) -> some View {
+        VStack(spacing: 4) {
+            shortcutIcon(shortcut)
+            Text(shortcut.displayRepresentation.title)
                 .font(.caption2)
                 .lineLimit(1)
+                .minimumScaleFactor(0.65)
         }
-        .frame(maxWidth: .infinity, minHeight: 44)
+        .frame(maxWidth: .infinity, minHeight: 48)
         .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private func shortcutIcon(_ shortcut: SystemShortcut) -> some View {
+        if let representation = shortcut.displayRepresentation.image,
+           let uiImage = systemShortcutUIImage(from: representation) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .renderingMode(.original)
+                .scaledToFit()
+                .frame(width: 34, height: 34)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        } else {
+            let title = String(localized: shortcut.displayRepresentation.title)
+            ZStack {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color.accentColor.gradient)
+                Text(shortcutInitials(title))
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(width: 34, height: 34)
+        }
+    }
+
+    private func shortcutInitials(_ title: String) -> String {
+        let words = title.split(whereSeparator: { $0.isWhitespace })
+        guard let first = words.first else { return "•" }
+        if words.count > 1, let a = first.first, let b = words[1].first {
+            return "\(a)\(b)".uppercased()
+        }
+        return String(first.prefix(2)).uppercased()
+    }
+
+    private func systemShortcutUIImage(from image: DisplayRepresentation.Image) -> UIImage? {
+        extractUIImage(from: image, depth: 0)
+    }
+
+    private func extractUIImage(from value: Any, depth: Int) -> UIImage? {
+        guard depth < 6 else { return nil }
+
+        if let uiImage = value as? UIImage {
+            return uiImage
+        }
+        if let data = value as? Data, let uiImage = UIImage(data: data) {
+            return uiImage
+        }
+        if let url = value as? URL, url.isFileURL,
+           let data = try? Data(contentsOf: url),
+           let uiImage = UIImage(data: data) {
+            return uiImage
+        }
+
+        let mirror = Mirror(reflecting: value)
+        for child in mirror.children {
+            if let image = extractUIImage(from: child.value, depth: depth + 1) {
+                return image
+            }
+        }
+        return nil
     }
 }
 
