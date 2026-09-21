@@ -26,13 +26,53 @@ struct WidgetLauncherEntryView: View {
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: columnCount)
-        LazyVGrid(columns: columns, spacing: 8) {
-            ForEach(Array(shortcuts.prefix(slotCount).enumerated()), id: \.offset) { index, shortcut in
-                launcherSlot(shortcut, number: index + 1)
+        VStack(alignment: .leading, spacing: 7) {
+            Text(widgetTitle)
+                .font(.headline)
+                .lineLimit(1)
+
+            let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: columnCount)
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(Array(shortcuts.prefix(slotCount).enumerated()), id: \.offset) { index, shortcut in
+                    launcherSlot(shortcut, number: index + 1)
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .containerBackground(for: .widget) {
+            backgroundView
+        }
+    }
+
+    private var widgetTitle: String {
+        let trimmed = entry.configuration.customTitle?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? categoryTitle : trimmed
+    }
+
+    private var categoryTitle: String {
+        LauncherCategory.caseDisplayRepresentations[entry.configuration.category]?.title.description ?? "Suggestions"
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        switch entry.configuration.background {
+        case .system:
+            Color(.secondarySystemBackground)
+        case .clear:
+            Color.clear
+        case .dark:
+            Color.black
+        case .light:
+            Color.white
+        case .blue:
+            Color.blue
+        case .green:
+            Color.green
+        case .purple:
+            Color.purple
+        case .orange:
+            Color.orange
+        }
     }
 
     private var shortcuts: [SystemShortcut?] {
@@ -53,11 +93,7 @@ struct WidgetLauncherEntryView: View {
     }
 
     private var slotCount: Int {
-        switch family {
-        case .systemSmall: 4
-        case .systemMedium: 8
-        default: 8
-        }
+        family == .systemSmall ? 4 : 8
     }
 
     @ViewBuilder
@@ -76,7 +112,7 @@ struct WidgetLauncherEntryView: View {
         VStack(spacing: 3) {
             Image(systemName: configured ? "app.fill" : "plus.app")
                 .font(.title2)
-            Text(configured ? "Abrir" : "\(number)")
+            Text(configured ? "Open" : "\(number)")
                 .font(.caption2)
                 .lineLimit(1)
         }
@@ -91,10 +127,9 @@ struct WidgetLauncher: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: LauncherConfigurationIntent.self, provider: Provider()) { entry in
             WidgetLauncherEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Dan Launcher")
-        .description("Open several apps or shortcuts directly from the Home Screen.")
+        .description("Choose a category, title, background, and launcher actions.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
