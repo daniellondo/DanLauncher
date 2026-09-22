@@ -29,6 +29,7 @@ Repository-local agent skills live under `.agents/skills/`. Load the smallest re
 - `ctx-index` and `ctx-search`: index/search project context when the runtime provides Context Mode MCP tools.
 - `mobile-ios-design`: SwiftUI/iOS UX and HIG work.
 - `swiftui-design`: visual polish/review for SwiftUI.
+- `graphify`: broad architecture discovery, dependency relationships, and impact analysis; verify findings against current source.
 
 These are vendored project instructions; tool availability depends on the agent runtime.
 
