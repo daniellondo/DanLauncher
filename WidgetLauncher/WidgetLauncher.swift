@@ -1,88 +1,167 @@
-//
-//  WidgetLauncher.swift
-//  WidgetLauncher
-//
-//  Created by Daniel Londoño Ospina on 21/09/26.
-//
-
 import WidgetKit
 import SwiftUI
+import AppIntents
 
 struct Provider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent())
+        SimpleEntry(date: .now, configuration: LauncherConfigurationIntent())
     }
 
-    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: configuration)
+    func snapshot(for configuration: LauncherConfigurationIntent, in context: Context) async -> SimpleEntry {
+        SimpleEntry(date: .now, configuration: configuration)
     }
 
-    func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        var entries: [SimpleEntry] = []
-
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: configuration)
-            entries.append(entry)
-        }
-
-        return Timeline(entries: entries, policy: .atEnd)
+    func timeline(for configuration: LauncherConfigurationIntent, in context: Context) async -> Timeline<SimpleEntry> {
+        Timeline(entries: [SimpleEntry(date: .now, configuration: configuration)], policy: .never)
     }
-
-//    func relevances() async -> WidgetRelevances<ConfigurationAppIntent> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
 }
 
 struct SimpleEntry: TimelineEntry {
     let date: Date
-    let configuration: ConfigurationAppIntent
+    let configuration: LauncherConfigurationIntent
 }
 
-struct WidgetLauncherEntryView : View {
-    var entry: Provider.Entry
+struct WidgetLauncherEntryView: View {
+    let entry: SimpleEntry
+    @Environment(\.widgetFamily) private var family
 
     var body: some View {
-        VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
+        VStack(alignment: .leading, spacing: 7) {
+            Text(widgetTitle)
+                .font(.headline)
+                .lineLimit(1)
 
-            Text("Favorite Emoji:")
-            Text(entry.configuration.favoriteEmoji)
+            let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: columnCount)
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(Array(shortcuts.prefix(slotCount).enumerated()), id: \.offset) { index, shortcut in
+                    launcherSlot(shortcut, number: index + 1)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .containerBackground(for: .widget) {
+            backgroundView
+        }
+    }
+
+    private var widgetTitle: String {
+        let trimmed = entry.configuration.customTitle?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? categoryTitle : trimmed
+    }
+
+    private var categoryTitle: String {
+        switch entry.configuration.category {
+        case .suggestions: "Suggestions"
+        case .banking: "Banking"
+        case .payments: "Payments"
+        case .crypto: "Crypto"
+        case .trading: "Trading"
+        case .smartHome: "Smart Home"
+        case .work: "Work"
+        case .ai: "AI"
+        case .security: "Security"
+        case .communication: "Communication"
+        case .social: "Social"
+        case .travel: "Travel"
+        case .transportation: "Transportation"
+        case .shopping: "Shopping"
+        case .food: "Food & Dining"
+        case .entertainment: "Entertainment"
+        case .healthFitness: "Health & Fitness"
+        case .utilities: "Utilities"
+        case .uncategorized: "Uncategorized"
+        }
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        switch entry.configuration.background {
+        case .system:
+            Color(.secondarySystemBackground)
+        case .clear:
+            Color.clear
+        case .dark:
+            Color.black
+        case .light:
+            Color.white
+        case .blue:
+            Color.blue
+        case .green:
+            Color.green
+        case .purple:
+            Color.purple
+        case .orange:
+            Color.orange
+        }
+    }
+
+    private var shortcuts: [SystemShortcut?] {
+        [
+            entry.configuration.shortcut1,
+            entry.configuration.shortcut2,
+            entry.configuration.shortcut3,
+            entry.configuration.shortcut4,
+            entry.configuration.shortcut5,
+            entry.configuration.shortcut6,
+            entry.configuration.shortcut7,
+            entry.configuration.shortcut8
+        ]
+    }
+
+    private var columnCount: Int {
+        family == .systemSmall ? 2 : 4
+    }
+
+    private var slotCount: Int {
+        family == .systemSmall ? 4 : 8
+    }
+
+    @ViewBuilder
+    private func launcherSlot(_ shortcut: SystemShortcut?, number: Int) -> some View {
+        if let shortcut {
+            Button(intent: RunSystemShortcutIntent(shortcut: shortcut)) {
+                slotLabel(number: number, configured: true)
+            }
+            .buttonStyle(.plain)
+        } else {
+            slotLabel(number: number, configured: false)
+        }
+    }
+
+    private func slotLabel(number: Int, configured: Bool) -> some View {
+        VStack(spacing: 3) {
+            Image(systemName: configured ? "app.fill" : "plus.app")
+                .font(.title2)
+            Text(configured ? "Open" : "\(number)")
+                .font(.caption2)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, minHeight: 44)
+        .contentShape(Rectangle())
     }
 }
 
 struct WidgetLauncher: Widget {
-    let kind: String = "WidgetLauncher"
+    let kind = "WidgetLauncher"
 
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
+        AppIntentConfiguration(kind: kind, intent: LauncherConfigurationIntent.self, provider: Provider()) { entry in
             WidgetLauncherEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
         }
-    }
-}
-
-extension ConfigurationAppIntent {
-    fileprivate static var smiley: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "😀"
-        return intent
-    }
-
-    fileprivate static var starEyes: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "🤩"
-        return intent
+        .configurationDisplayName("Dan Launcher")
+        .description("Choose a category, title, background, and launcher actions.")
+        .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
 
 #Preview(as: .systemSmall) {
     WidgetLauncher()
 } timeline: {
-    SimpleEntry(date: .now, configuration: .smiley)
-    SimpleEntry(date: .now, configuration: .starEyes)
+    SimpleEntry(date: .now, configuration: LauncherConfigurationIntent())
+}
+
+#Preview(as: .systemMedium) {
+    WidgetLauncher()
+} timeline: {
+    SimpleEntry(date: .now, configuration: LauncherConfigurationIntent())
 }
