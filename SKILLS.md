@@ -13,6 +13,7 @@ Use the repository-local skills under `.agents/skills/` whenever the task matche
 | `ctx-search` | Searching indexed DanLauncher context efficiently instead of repeatedly loading large files. |
 | `mobile-ios-design` | Any iOS UX/UI, widget layout, accessibility, Dynamic Type, navigation, native controls, light/dark mode, or Apple-platform design work. |
 | `swiftui-design` | SwiftUI/WidgetKit visual implementation and polish, especially app grids, category widgets, configuration screens, and rendering modes. |
+| `graphify` | Broad/unknown-target codebase discovery, architecture/dependency graphs, impact analysis, and GraphRAG context. Verify conclusions against current source/tests. |
 
 ## Agent startup sequence
 
