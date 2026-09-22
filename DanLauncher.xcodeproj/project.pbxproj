@@ -362,7 +362,6 @@
 		000000000000000111000000 /* Debug configuration for PBXNativeTarget "DanLauncher" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = DanLauncher/DanLauncher.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UNUMU552GC;
@@ -401,7 +400,6 @@
 		000000000000000112000000 /* Release configuration for PBXNativeTarget "DanLauncher" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = DanLauncher/DanLauncher.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UNUMU552GC;
