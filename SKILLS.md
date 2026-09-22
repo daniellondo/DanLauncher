@@ -14,6 +14,7 @@ Use the repository-local skills under `.agents/skills/` whenever the task matche
 | `mobile-ios-design` | Any iOS UX/UI, widget layout, accessibility, Dynamic Type, navigation, native controls, light/dark mode, or Apple-platform design work. |
 | `swiftui-design` | SwiftUI/WidgetKit visual implementation and polish, especially app grids, category widgets, configuration screens, and rendering modes. |
 | `graphify` | Broad/unknown-target codebase discovery, architecture/dependency graphs, impact analysis, and GraphRAG context. Verify conclusions against current source/tests. |
+| `brainstorming` | Ambiguous features, new flows, technical blockers, architecture choices, and product/UX decisions that should explore multiple approaches before coding. |
 
 ## Agent startup sequence
 
