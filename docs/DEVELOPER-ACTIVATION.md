@@ -1,7 +1,7 @@
 # Apple Developer activation and automatic-inventory runbook
 
 Status: **pending membership/profile verification and physical-device testing**.
-Apple references checked: **2026-09-22**. Repository baseline inspected: `22c05a9b434558cec88537bc68930bd099fe49ab` on `feature/native-launcher-v2`.
+Apple references checked: **2026-09-22**. Historical repository baseline inspected: `22c05a9b434558cec88537bc68930bd099fe49ab`. Current work continues only on **`main`**; see [REPOSITORY-WORKFLOW.md](REPOSITORY-WORKFLOW.md).
 
 Use this runbook when Daniel says his Apple Developer Program membership is active. It describes future work; adding this document does not enable capabilities, restore discovery code, or certify that automatic organization works.
 
@@ -27,7 +27,7 @@ Project evidence: multiple widget buttons using `SystemShortcut` and `RunSystemS
 
 1. Confirm enrollment is active in the Apple Developer account, not merely submitted or paid. Complete any outstanding account verification or agreements.
 2. In Xcode Settings, open the account-management pane (Accounts/Apple Accounts, depending on Xcode), sign in or refresh the account, and verify the enrolled team is available. Do not assume its Team ID must differ from the previous one; verify membership and profile eligibility.
-3. Save local changes, record the current commit, and preserve a recovery branch before modifying signing. Continue from the latest reviewed project, not a stale experimental checkout. Keep the known-good app/widget installed unless a specific migration problem requires removal; deletion loses widget configuration.
+3. Save local changes, record the current recovery commit, and preserve a local backup before modifying signing. Continue from the latest reviewed `main`, not a stale experimental checkout. Do not create a recovery branch. Keep the known-good app/widget installed unless a specific migration problem requires removal; deletion loses widget configuration.
 4. In `DanLauncher.xcodeproj`, select each existing target's **Signing & Capabilities** tab. Use the enrolled team and **Automatically manage signing** for both targets:
    - `DanLauncher`: `com.daniellondospi.DanLauncher`
    - `WidgetLauncherExtension`: `com.daniellondospi.DanLauncher.WidgetLauncher`
@@ -131,7 +131,7 @@ Before TestFlight/App Store or another distribution method:
 Create a short dated result in `docs/` after each gate. Use synthetic fixtures or redact personal inventory; do not commit the device UDID or provisioning files.
 
 ```text
-Commit / branch:
+Commit / branch (main):
 Date / tester:
 Xcode + SDK / device OS:
 Install method (development, TestFlight, etc.):
@@ -156,7 +156,7 @@ Completion checklist — leave unchecked until observed:
 - [ ] Revocation, scan failure, empty category, and install/uninstall tests pass.
 - [ ] Distribution/region constraints recorded separately if distribution is requested.
 
-If a gate fails, preserve its exact evidence and revert only the experimental changes on the work branch. Do not restore an old `.pbxproj`, delete working targets, erase widget settings, or revert unrelated name/icon fixes. Report signing, Swift compilation, runtime authorization, and UX failures as different problems. An agent must never mark physical-device steps as passed solely from Linux checks, documentation, or a successful Build.
+If a gate fails, preserve its exact evidence and revert only the experimental changes with a new commit on `main`. Do not rewrite published history, restore an old `.pbxproj`, delete working targets, erase widget settings, or revert unrelated name/icon fixes. Report signing, Swift compilation, runtime authorization, and UX failures as different problems. An agent must never mark physical-device steps as passed solely from Linux checks, documentation, or a successful Build.
 
 ## Apple references
 

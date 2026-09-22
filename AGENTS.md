@@ -3,6 +3,14 @@
 ## Mission
 Build a native iOS launcher that organizes the user's installed apps into category widgets with an Apple-native experience. The end state is: discover apps -> classify them -> persist a category inventory -> render category widgets -> launch an app with the least manual configuration allowed by public iOS APIs.
 
+## Repository workflow — main only
+Daniel requires a single working branch: **`main`**. Keep the current code, skills, and documentation together there so a reviewer can clone the default branch and see the complete project.
+- Start from the latest `origin/main`; check for local or concurrent changes before writing.
+- Commit approved changes directly to `main`. Do not create feature, backup, or work branches unless Daniel explicitly changes this requirement.
+- Preserve recovery points through commit history and local backups, not additional remote branches. Use small reversible commits; never force-push or erase unrelated work.
+- Treat old branch names in commit messages or historical records as history, not checkout instructions.
+- Read [docs/REPOSITORY-WORKFLOW.md](docs/REPOSITORY-WORKFLOW.md) for the consolidation record and update procedure.
+
 ## Current reality
 - Native SwiftUI app + WidgetKit extension.
 - Deployment target is iOS 27.
