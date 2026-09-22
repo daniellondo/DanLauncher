@@ -1,8 +1,6 @@
 import WidgetKit
 import SwiftUI
 import AppIntents
-import Foundation
-import UIKit
 
 struct Provider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
@@ -10,120 +8,40 @@ struct Provider: AppIntentTimelineProvider {
     }
 
     func snapshot(for configuration: LauncherConfigurationIntent, in context: Context) async -> SimpleEntry {
-        await makeEntry(configuration, allowNetwork: !context.isPreview)
+        SimpleEntry(date: .now, configuration: configuration)
     }
 
     func timeline(for configuration: LauncherConfigurationIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        let entry = await makeEntry(configuration, allowNetwork: true)
-        // The system schedules this request; this is not an exact refresh timer.
-        return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(6 * 3600)))
-    }
-
-    private func makeEntry(_ configuration: LauncherConfigurationIntent, allowNetwork: Bool) async -> SimpleEntry {
-        let shortcuts = configuration.launcherShortcuts
-        var presentations = shortcuts.enumerated().map { index, shortcut in
-            guard let shortcut else { return LauncherSlotPresentation(name: "Add \(index + 1)") }
-            let display = shortcut.displayRepresentation
-            let title = String(localized: display.title)
-            let subtitle = display.subtitle.map { String(localized: $0) }
-            return LauncherSlotPresentation(
-                name: LauncherPresentation.name(title: title, subtitle: subtitle, slot: index + 1),
-                artworkData: SystemShortcutArtwork.pngData(from: display.image)
-            )
-        }
-        if allowNetwork && configuration.useAppStoreIcons {
-            let country = LauncherPresentation.storefrontCountry(Locale.current.region?.identifier)
-            let requests = shortcuts.indices.filter {
-                shortcuts[$0] != nil && presentations[$0].artworkData == nil
-            }.map { ($0, presentations[$0].name) }
-            // Resolve artwork BEFORE producing the timeline. AsyncImage/task in
-            // the widget view cannot reliably finish before WidgetKit snapshots it.
-            await withTaskGroup(of: (Int, Data?).self) { group in
-                var pending = requests.makeIterator()
-                for _ in 0..<4 {
-                    guard let (index, name) = pending.next() else { break }
-                    group.addTask { (index, await AppStoreArtwork.shared.image(for: name, country: country)) }
-                }
-                for await (index, data) in group {
-                    presentations[index].artworkData = data
-                    if let (nextIndex, name) = pending.next() {
-                        group.addTask { (nextIndex, await AppStoreArtwork.shared.image(for: name, country: country)) }
-                    }
-                }
-            }
-        }
-        return SimpleEntry(date: .now, configuration: configuration, presentations: presentations)
-    }
-}
-
-// Preserve the native-image attempt introduced in commit 4044609. Mirror is
-// best-effort compatibility, NOT a documented DisplayRepresentation image API.
-// If the system stores an opaque reference instead, use initials or opt-in artwork.
-private enum SystemShortcutArtwork {
-    static func pngData(from representation: DisplayRepresentation.Image?) -> Data? {
-        guard let representation,
-              let image = extract(from: representation, depth: 0),
-              let data = image.pngData(), data.count <= 1_500_000 else { return nil }
-        return data
-    }
-
-    private static func extract(from value: Any, depth: Int) -> UIImage? {
-        guard depth < 6 else { return nil }
-        if let image = value as? UIImage { return image }
-        if let data = value as? Data, data.count <= 1_500_000,
-           let image = UIImage(data: data) { return image }
-        if let url = value as? URL, url.isFileURL,
-           let attributes = try? FileManager.default.attributesOfItem(atPath: url.path),
-           let size = attributes[.size] as? NSNumber, size.intValue <= 1_500_000,
-           let data = try? Data(contentsOf: url), let image = UIImage(data: data) {
-            return image
-        }
-        for child in Mirror(reflecting: value).children {
-            if let image = extract(from: child.value, depth: depth + 1) { return image }
-        }
-        return nil
-    }
-}
-
-extension LauncherConfigurationIntent {
-    var launcherShortcuts: [SystemShortcut?] {
-        [shortcut1, shortcut2, shortcut3, shortcut4, shortcut5, shortcut6, shortcut7, shortcut8]
+        Timeline(entries: [SimpleEntry(date: .now, configuration: configuration)], policy: .never)
     }
 }
 
 struct SimpleEntry: TimelineEntry {
     let date: Date
     let configuration: LauncherConfigurationIntent
-    var presentations: [LauncherSlotPresentation] = []
 }
 
 struct WidgetLauncherEntryView: View {
     let entry: SimpleEntry
     @Environment(\.widgetFamily) private var family
-    @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 7) {
             Text(widgetTitle)
                 .font(.headline)
                 .lineLimit(1)
-                .minimumScaleFactor(0.8)
 
-            GeometryReader { geometry in
-                let rowHeight = max(1, (geometry.size.height - 6) / 2)
-                let iconSize = max(20, min(44, rowHeight - (entry.configuration.showAppNames ? 18 : 4)))
-                let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: columnCount)
-                LazyVGrid(columns: columns, spacing: 6) {
-                    ForEach(0..<slotCount, id: \.self) { index in
-                        launcherSlot(at: index, iconSize: iconSize)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: rowHeight)
-                    }
+            let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: columnCount)
+            LazyVGrid(columns: columns, spacing: 8) {
+                ForEach(Array(shortcuts.prefix(slotCount).enumerated()), id: \.offset) { index, shortcut in
+                    launcherSlot(shortcut, number: index + 1)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .foregroundStyle(contentColor)
-        .containerBackground(for: .widget) { backgroundView }
+        .containerBackground(for: .widget) {
+            backgroundView
+        }
     }
 
     private var widgetTitle: String {
@@ -155,99 +73,71 @@ struct WidgetLauncherEntryView: View {
         }
     }
 
-    private var contentColor: Color {
-        // A fixed white foreground disappears on a light background, and vice versa.
-        guard renderingMode == .fullColor else { return .primary }
-        switch entry.configuration.background {
-        case .light, .green, .orange: return .black
-        case .dark, .blue, .purple: return .white
-        case .system, .clear: return .primary
-        }
-    }
-
     @ViewBuilder
     private var backgroundView: some View {
         switch entry.configuration.background {
-        case .system: Color(uiColor: .secondarySystemBackground)
-        case .clear: Color.clear
-        case .dark: Color.black
-        case .light: Color.white
-        case .blue: Color.blue
-        case .green: Color.green
-        case .purple: Color.purple
-        case .orange: Color.orange
+        case .system:
+            Color(.secondarySystemBackground)
+        case .clear:
+            Color.clear
+        case .dark:
+            Color.black
+        case .light:
+            Color.white
+        case .blue:
+            Color.blue
+        case .green:
+            Color.green
+        case .purple:
+            Color.purple
+        case .orange:
+            Color.orange
         }
     }
 
-    private var columnCount: Int { family == .systemSmall ? 2 : 4 }
-    private var slotCount: Int { family == .systemSmall ? 4 : 8 }
+    private var shortcuts: [SystemShortcut?] {
+        [
+            entry.configuration.shortcut1,
+            entry.configuration.shortcut2,
+            entry.configuration.shortcut3,
+            entry.configuration.shortcut4,
+            entry.configuration.shortcut5,
+            entry.configuration.shortcut6,
+            entry.configuration.shortcut7,
+            entry.configuration.shortcut8
+        ]
+    }
 
-    private func presentation(at index: Int) -> LauncherSlotPresentation {
-        guard entry.presentations.indices.contains(index) else {
-            return LauncherSlotPresentation(name: "App \(index + 1)")
-        }
-        return entry.presentations[index]
+    private var columnCount: Int {
+        family == .systemSmall ? 2 : 4
+    }
+
+    private var slotCount: Int {
+        family == .systemSmall ? 4 : 8
     }
 
     @ViewBuilder
-    private func launcherSlot(at index: Int, iconSize: CGFloat) -> some View {
-        if let shortcut = entry.configuration.launcherShortcuts[index] {
-            let metadata = presentation(at: index)
-            // Preserve the native direct-launch action. Artwork is presentation only.
+    private func launcherSlot(_ shortcut: SystemShortcut?, number: Int) -> some View {
+        if let shortcut {
             Button(intent: RunSystemShortcutIntent(shortcut: shortcut)) {
-                VStack(spacing: 3) {
-                    appIcon(metadata, size: iconSize)
-                    if entry.configuration.showAppNames {
-                        Text(verbatim: metadata.name)
-                            .font(.system(size: 10, weight: .medium))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .contentShape(Rectangle())
+                slotLabel(number: number, configured: true)
             }
             .buttonStyle(.plain)
-            // Keep a meaningful VoiceOver name when the visual name is hidden.
-            .accessibilityLabel(Text("Open \(metadata.name)"))
         } else {
-            VStack(spacing: 3) {
-                Image(systemName: "plus.app")
-                    .font(.system(size: iconSize * 0.75))
-                    .frame(width: iconSize, height: iconSize)
-                if entry.configuration.showAppNames {
-                    Text("\(index + 1)").font(.system(size: 10))
-                }
-            }
-            .opacity(0.55)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text("Unconfigured slot \(index + 1)"))
-            .accessibilityHint("Use Edit Widget to choose an app")
+            slotLabel(number: number, configured: false)
         }
     }
 
-    @ViewBuilder
-    private func appIcon(_ metadata: LauncherSlotPresentation, size: CGFloat) -> some View {
-        if let data = metadata.artworkData, let image = UIImage(data: data) {
-            Image(uiImage: image)
-                .renderingMode(.original)
-                .resizable()
-                .widgetAccentedRenderingMode(.fullColor)
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size, height: size)
-                .clipShape(RoundedRectangle(cornerRadius: size * 0.22, style: .continuous))
-                .accessibilityHidden(true)
-        } else {
-            // An explicit fallback, NOT the real app icon. No blank white squares.
-            ZStack {
-                RoundedRectangle(cornerRadius: size * 0.22, style: .continuous)
-                    .fill(contentColor.opacity(0.15))
-                Text(verbatim: LauncherPresentation.initials(for: metadata.name))
-                    .font(.system(size: size * 0.38, weight: .semibold, design: .rounded))
-            }
-            .frame(width: size, height: size)
-            .accessibilityHidden(true)
+    private func slotLabel(number: Int, configured: Bool) -> some View {
+        VStack(spacing: 3) {
+            Image(systemName: configured ? "app.fill" : "plus.app")
+                .font(.title2)
+            Text(configured ? "Open" : "\(number)")
+                .font(.caption2)
+                .lineLimit(1)
         }
+        .frame(maxWidth: .infinity, minHeight: 44)
+        .contentShape(Rectangle())
     }
 }
 
@@ -259,7 +149,7 @@ struct WidgetLauncher: Widget {
             WidgetLauncherEntryView(entry: entry)
         }
         .configurationDisplayName("Dan Launcher")
-        .description("Choose a category title, background, app labels, and launcher actions.")
+        .description("Choose a category, title, background, and launcher actions.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
