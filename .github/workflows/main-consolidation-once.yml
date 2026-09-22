@@ -1,0 +1,111 @@
+name: One-off main consolidation
+
+# Requested by the repository owner. Remove this workflow after verification.
+# Only the three fixed, archived tips below may be deleted; main is never pushed.
+"on":
+  push:
+    branches: [main]
+    paths: [.github/workflows/main-consolidation-once.yml]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: danlauncher-one-off-main-consolidation
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: github.repository == 'daniellondo/DanLauncher' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Verify archived history and delete only unchanged obsolete refs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          import subprocess
+          import tempfile
+          import urllib.request
+
+          repo = os.environ['GITHUB_REPOSITORY']
+          if repo != 'daniellondo/DanLauncher':
+              raise SystemExit('Unexpected repository; no changes made')
+          token = os.environ['GH_TOKEN']
+          expected = {
+              'backup/launcher-before-app-labels-2026-09-21': 'ff432c528273bb13795dd63fda7845bab4eacdef',
+              'feature/native-launcher-v2': '2aac67eb41859f76c402f51f37b0194a27b74ed3',
+              'feature/system-shortcut-launcher': '98e13dce48e54f832805aea326d432f17e515cf7',
+          }
+
+          def get(path):
+              request = urllib.request.Request(
+                  'https://api.github.com/repos/' + repo + path,
+                  headers={
+                      'Authorization': 'Bearer ' + token,
+                      'Accept': 'application/vnd.github+json',
+                      'X-GitHub-Api-Version': '2022-11-28',
+                      'User-Agent': 'DanLauncher-one-off-consolidation',
+                  },
+              )
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  return json.load(response)
+
+          if get('')['default_branch'] != 'main':
+              raise SystemExit('Default branch changed; no changes made')
+          branches = get('/branches?per_page=100')
+          if len(branches) >= 100:
+              raise SystemExit('Branch listing may be incomplete; no changes made')
+          found = {item['name']: item for item in branches}
+          if 'main' not in found or set(found) - set(expected) - {'main'}:
+              raise SystemExit('Unexpected branch state; no changes made')
+          main_sha = found['main']['commit']['sha']
+          if main_sha != os.environ['GITHUB_SHA']:
+              raise SystemExit('Main changed since this run was queued; no changes made')
+          baseline = get('/compare/c6575fb7040d8fee6ebc8f0e7f3e39b60c29e6fa...' + main_sha)
+          if baseline['status'] not in ('ahead', 'identical'):
+              raise SystemExit('Consolidated history missing; no changes made')
+          pending = []
+          for name, sha in expected.items():
+              if name not in found:
+                  continue
+              if found[name]['protected'] or found[name]['commit']['sha'] != sha:
+                  raise SystemExit('Protected or changed branch: ' + name + '; no changes made')
+              comparison = get('/compare/' + sha + '...' + main_sha)
+              if comparison['status'] not in ('ahead', 'identical'):
+                  raise SystemExit('History is not contained in main: ' + name)
+              if comparison['merge_base_commit']['sha'] != sha:
+                  raise SystemExit('Unexpected ancestry: ' + name)
+              pending.append((name, sha))
+              print('Verified in main: ' + name)
+
+          if pending:
+              with tempfile.TemporaryDirectory() as directory:
+                  subprocess.run(['git', 'init', '--bare', '-q', directory], check=True)
+                  subprocess.run(['git', '-C', directory, 'remote', 'add', 'origin',
+                                  'https://github.com/' + repo + '.git'], check=True)
+                  env = os.environ.copy()
+                  basic = base64.b64encode(('x-access-token:' + token).encode()).decode()
+                  env.update({
+                      'GIT_TERMINAL_PROMPT': '0',
+                      'GIT_CONFIG_COUNT': '1',
+                      'GIT_CONFIG_KEY_0': 'http.https://github.com/.extraheader',
+                      'GIT_CONFIG_VALUE_0': 'AUTHORIZATION: basic ' + basic,
+                  })
+                  # Exact leases guard against concurrent updates; atomic means all or none.
+                  leases = ['--force-with-lease=refs/heads/' + name + ':' + sha for name, sha in pending]
+                  deletions = [':refs/heads/' + name for name, sha in pending]
+                  subprocess.run(['git', '-C', directory, 'push', '--atomic'] + leases
+                                 + ['origin'] + deletions, env=env, check=True, timeout=60)
+
+          remaining = get('/branches?per_page=100')
+          names = sorted(item['name'] for item in remaining)
+          if names != ['main']:
+              raise SystemExit('Post-check requires attention: ' + ', '.join(names))
+          print('Verified: main is the only remote branch. Archived history is retained.')
+          PY
