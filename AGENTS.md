@@ -30,6 +30,7 @@ Repository-local agent skills live under `.agents/skills/`. Load the smallest re
 - `mobile-ios-design`: SwiftUI/iOS UX and HIG work.
 - `swiftui-design`: visual polish/review for SwiftUI.
 - `graphify`: broad architecture discovery, dependency relationships, and impact analysis; verify findings against current source.
+- `brainstorming`: explore competing product/UX/architecture approaches and risky assumptions before implementation.
 
 These are vendored project instructions; tool availability depends on the agent runtime.
 
