@@ -23,6 +23,9 @@ Build a native iOS launcher that organizes the user's installed apps into catego
 9. Never claim automatic app discovery or arbitrary app launching works until validated on the physical iPhone.
 10. Keep documentation synchronized with important findings and limitations.
 
+## When Apple Developer membership becomes active
+Read [docs/DEVELOPER-ACTIVATION.md](docs/DEVELOPER-ACTIVATION.md) before changing signing or restoring inventory code. Follow its gates in order: enrolled team and baseline, signed capabilities, runtime inventory probe, public launch-bridge test, then shared catalog/category widgets. Membership alone does not pass the other gates. Keep all acceptance items pending until evidence is recorded; treat distribution and regional eligibility separately from Xcode development testing. Do not recreate the project, copy back obsolete experiments wholesale, or remove the proven launch fallback.
+
 ## Skills
 Repository-local agent skills live under `.agents/skills/`. Load the smallest relevant skill:
 - `context-mode`: large-output/context-efficient repository work.

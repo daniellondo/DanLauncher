@@ -12,7 +12,11 @@ See:
 - `docs/PROJECT.md` for product requirements and known limitations.
 - `docs/ARCHITECTURE.md` for technical direction.
 - `docs/ROADMAP.md` for implementation phases.
+- [Apple Developer activation runbook](docs/DEVELOPER-ACTIVATION.md) for the exact steps after membership becomes active, capability/profile checks, device tests, and distribution limits.
 - `.agents/skills/` for repository-local agent skills.
+
+## After Apple Developer enrollment
+Follow [docs/DEVELOPER-ACTIVATION.md](docs/DEVELOPER-ACTIVATION.md) before restoring automatic discovery. Membership, signing, runtime authorization, and a public launch bridge are separate gates. This is a future implementation checklist, not a claim that purchasing membership completes Home Screen automation.
 
 ## Principles
 Public iOS APIs only. Preserve device-validated behavior. Verify new Apple APIs before relying on them. Keep the Home Screen widget as the primary experience and the host app as configuration/diagnostics.
